@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Lab 6: React and Node/Express Data Representation and Querying
 
 The following exercises focus on using **Node/Express** and **React** to represent and query data.
@@ -209,3 +210,7 @@ By completing this lab, you have learned:
 
 Together, these steps show how to build a full-stack application where the frontend (React) communicates with a backend (Node/Express) for dynamic, data-driv
 
+=======
+# DataRepsLab7
+Lab 7 MongoDB within a Mern stack 
+>>>>>>> f4b6afac6ed76ee19a1b2c894b63e6ac8f146f5e

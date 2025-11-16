@@ -1,21 +1,44 @@
 import express from 'express';
-const app = express();
-const port = 3000;
-
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import cors from 'cors';
+import bodyParser from 'body-parser';
+
+// Load env vars from .env (if present)
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+
 app.use(cors());
 
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
   next();
 });
 
-import bodyParser from 'body-parser';
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// MongoDB connection (try environment first, otherwise use local default)
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/lab_six_db';
+
+// Use recommended mongoose settings
+mongoose.set('strictQuery', false);
+
+mongoose.connect(MONGODB_URI, {
+  // these options are not required in recent mongoose versions but harmless to include
+  // keep compatibility across versions
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => {
+  console.log('MongoDB connected');
+}).catch((err) => {
+  console.error('MongoDB connection error:', err.message || err);
+  console.error('Server will continue running but database operations will fail until a valid MONGODB_URI is provided.');
+});
 
 app.get('/', (req, res) => {
     res.send('Hello World');
@@ -57,4 +80,5 @@ app.post('/api/movies', (req, res) => {
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
+    console.log(`MongoDB URI: ${process.env.MONGODB_URI ? '[from env]' : '[using default local mongodb://127.0.0.1:27017]'}`);
 });
