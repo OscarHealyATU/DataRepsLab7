@@ -9,10 +9,17 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3000;
+const movieSchema = new mongoose.Schema({
+  title: String,
+  year: String,
+  poster: String
+});
+
+const Movie = mongoose.model('Movie', movieSchema);
 
 app.use(cors());
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
@@ -41,11 +48,19 @@ mongoose.connect(MONGODB_URI, {
 });
 
 app.get('/', (req, res) => {
-    res.send('Hello World');
+  res.send('Hello World');
 });
 
+app.get('/api/movies', async (req, res) => {
+  const movies = await Movie.find({});
+  res.json(movies);
+});
+app.get('/api/movie/:id', async (req, res) => {
+  const movie = await Movie.findById(req.params.id);
+  res.send(movie);
+});
 app.get('/api/movies', (req, res) => {
-   const myMovies = [
+  const myMovies = [
     {
       "Title": "Avengers: Infinity War (server)",
       "Year": "2018",
@@ -67,18 +82,26 @@ app.get('/api/movies', (req, res) => {
       "Type": "movie",
       "Poster": "https://m.media-amazon.com/images/M/MV5BNDQ4YzFmNzktMmM5ZC00MDZjLTk1OTktNDE2ODE4YjM2MjJjXkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SX300.jpg"
     }
-  ] 
-    res.json({ myArray: myMovies });
+  ]
+  res.json({ myArray: myMovies });
 })
 
 
-app.post('/api/movies', (req, res) => {
-    console.log(req.body);
-    res.send('POST request to the movies endpoint');
-});
+// app.post('/api/movies', (req, res) => {
+//   console.log(req.body);
+//   res.send('POST request to the movies endpoint');
+// });
+ app.post('/api/movies', async (req, res)=>{
 
+ const { title, year, poster } = req.body;
+
+ const newMovie = new Movie({ title, year, poster });
+ await newMovie.save();
+
+ res.status(201).json({ message: 'Movie created successfully', movie: newMovie });
+ })
 
 app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-    console.log(`MongoDB URI: ${process.env.MONGODB_URI ? '[from env]' : '[using default local mongodb://127.0.0.1:27017]'}`);
+  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`MongoDB URI: ${process.env.MONGODB_URI ? '[from env]' : '[using default local mongodb://127.0.0.1:27017]'}`);
 });
